@@ -1,0 +1,241 @@
+[
+    {
+        "key": "tokenNameStyle",
+        "type": "enum",
+        "default": "camelCase",
+        "title": "Token name style",
+        "description": "Case used for generated Swift symbol names.",
+        "category": "Token names",
+        "options": {
+            "camelCase": {
+                "label": "Camel case",
+                "description": "Example: myVariableName"
+            },
+            "pascalCase": {
+                "label": "Pascal case",
+                "description": "Example: MyVariableName"
+            },
+            "constantCase": {
+                "label": "Constant case",
+                "description": "Example: MY_VARIABLE_NAME"
+            },
+            "snakeCase": {
+                "label": "Snake case",
+                "description": "Example: my_variable_name"
+            }
+        }
+    },
+    {
+        "key": "tokenNameStructure",
+        "type": "enum",
+        "default": "pathAndName",
+        "title": "Token name structure",
+        "description": "Control which parts are included in the exported token name.",
+        "category": "Token names",
+        "options": {
+            "pathAndName": {
+                "label": "Path + Name",
+                "description": "Include group path and name (e.g. buttonPrimaryBackground)"
+            },
+            "nameOnly": {
+                "label": "Name only",
+                "description": "Only include the name (e.g. background)"
+            }
+        }
+    },
+    {
+        "key": "globalNamePrefix",
+        "type": "string",
+        "default": "",
+        "title": "Global prefix",
+        "description": "Prefix prepended to every generated symbol name.",
+        "category": "Token names"
+    },
+    {
+        "key": "customizeTokenPrefixes",
+        "type": "boolean",
+        "default": false,
+        "title": "Customize type prefixes",
+        "description": "Apply a per-type prefix to each generated symbol name.",
+        "category": "Token names"
+    },
+    {
+        "key": "tokenPrefixes",
+        "type": "object",
+        "title": "Token prefixes",
+        "description": "Each token of a specific type is prefixed with the following identifier.",
+        "category": "Token names",
+        "dependsOn": {
+            "customizeTokenPrefixes": true
+        },
+        "default": {
+            "Blur": "",
+            "Border": "",
+            "BorderRadius": "",
+            "BorderWidth": "",
+            "Color": "",
+            "Dimension": "",
+            "Duration": "",
+            "FontFamily": "",
+            "FontSize": "",
+            "FontWeight": "",
+            "Gradient": "",
+            "LetterSpacing": "",
+            "LineHeight": "",
+            "Opacity": "",
+            "ParagraphSpacing": "",
+            "ProductCopy": "",
+            "Shadow": "",
+            "Size": "",
+            "Space": "",
+            "String": "",
+            "TextCase": "",
+            "TextDecoration": "",
+            "Typography": "",
+            "Visibility": "",
+            "ZIndex": ""
+        },
+        "allowedKeys": {
+            "options": [
+                "Color", "Typography", "Dimension", "Size", "Space", "Opacity",
+                "FontSize", "LineHeight", "LetterSpacing", "ParagraphSpacing",
+                "BorderWidth", "BorderRadius", "Duration", "ZIndex", "Shadow",
+                "Border", "Gradient", "String", "ProductCopy", "FontFamily",
+                "FontWeight", "TextCase", "TextDecoration", "Visibility", "Blur"
+            ],
+            "type": "string"
+        },
+        "allowedValues": {
+            "type": "string"
+        }
+    },
+    {
+        "key": "numericPrecision",
+        "type": "number",
+        "default": 2,
+        "title": "Numeric precision",
+        "description": "Maximum number of decimals used for numeric and color values.",
+        "category": "Token values"
+    },
+    {
+        "key": "useReferences",
+        "type": "boolean",
+        "default": true,
+        "title": "Use token references",
+        "description": "Values reference other tokens where a token is a full alias of another.",
+        "category": "Token values"
+    },
+    {
+        "key": "exportThemesAs",
+        "type": "enum",
+        "default": "separateFiles",
+        "title": "Theme export format",
+        "description": "Control how selected themes are exported.",
+        "category": "Themes",
+        "options": {
+            "separateFiles": {
+                "label": "Separate files per theme",
+                "description": "Generate a separate set of files for each selected theme"
+            },
+            "applyDirectly": {
+                "label": "Apply themes directly",
+                "description": "Apply selected themes directly to token values"
+            },
+            "mergedTheme": {
+                "label": "Merged theme files",
+                "description": "Generate one themed set of files with all themes applied together"
+            }
+        }
+    },
+    {
+        "key": "exportBaseValues",
+        "type": "boolean",
+        "default": true,
+        "title": "Export base values",
+        "description": "Base (non-themed) files are exported alongside theme files.",
+        "category": "Themes"
+    },
+    {
+        "key": "exportOnlyThemedTokens",
+        "type": "boolean",
+        "default": true,
+        "title": "Export only themed tokens",
+        "description": "Theme files only include tokens whose value differs from the base value.",
+        "category": "Themes"
+    },
+    {
+        "key": "baseStyleFilePath",
+        "type": "string",
+        "default": "./Styles",
+        "title": "Path to generated files",
+        "description": "All files are written to this directory relative to the export root.",
+        "category": "Style files"
+    },
+    {
+        "key": "generateEmptyFiles",
+        "type": "boolean",
+        "default": false,
+        "title": "Generate empty files",
+        "description": "Generate empty files instead of omitting types with no tokens.",
+        "category": "Style files"
+    },
+    {
+        "key": "showDescriptions",
+        "type": "boolean",
+        "default": true,
+        "title": "Show token descriptions",
+        "description": "Render the token description as a Swift doc comment for every token.",
+        "category": "Other"
+    },
+    {
+        "key": "showGeneratedFileDisclaimer",
+        "type": "boolean",
+        "default": true,
+        "title": "Show file disclaimer",
+        "description": "A message noting the file was generated automatically appears in every file.",
+        "category": "Other"
+    },
+    {
+        "key": "disclaimer",
+        "type": "string",
+        "default": "This file was generated automatically by Supernova.io and should not be changed manually.\nTo modify the format or content of this file, please contact your design system team.",
+        "title": "Disclaimer message",
+        "description": "The disclaimer rendered at the top of every generated file.",
+        "category": "Other",
+        "dependsOn": {
+            "showGeneratedFileDisclaimer": true
+        }
+    },
+    {
+        "key": "indent",
+        "type": "number",
+        "default": 4,
+        "title": "Indentation",
+        "description": "Number of spaces used to indent generated declarations.",
+        "category": "Other"
+    },
+    {
+        "key": "darkThemeName",
+        "type": "string",
+        "default": "dark",
+        "title": "Dark theme name",
+        "description": "Name of the theme whose values become the dark appearance of generated colorsets. Matched case-insensitively against each theme's code name or name.",
+        "category": "Colors"
+    },
+    {
+        "key": "colorAssetCatalogName",
+        "type": "string",
+        "default": "Colors.xcassets",
+        "title": "Color asset catalog name",
+        "description": "Name of the generated Xcode asset catalog that holds all color colorsets.",
+        "category": "Colors"
+    },
+    {
+        "key": "semanticGroupName",
+        "type": "string",
+        "default": "semantic",
+        "title": "Semantic color group name",
+        "description": "Only color tokens whose top-level group name matches this value (case-insensitively) are exported as colorsets. Primitive colors outside this group are dropped.",
+        "category": "Colors"
+    }
+]
