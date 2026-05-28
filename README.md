@@ -16,58 +16,77 @@ The SwiftUI Exporter allows you to **produce production-ready code for all produ
 
 You can generate all production ready-code either manually using Supernova's [VS Code extension](https://marketplace.visualstudio.com/items?itemName=SupernovaIO.pulsar-vsc-extension), or automate your code delivery pipeline using Supernova [Design Continuous Delivery](https://supernova.io/automated-code-delivery).
 
-For color, gradient and measure tokens, the exporter will generate extensions that expose all tokens through `Color.Token.tokenName`, `Gradient.Token.tokenName` or `AppMeasures.tokenName`.
+> **Note for users of 1.x:** This exporter was rewritten on Supernova's new TypeScript export engine in 2.0. The generated SwiftUI API changed (configurable naming, one file per token type, brand **and** theme support). See _Generated output_ below; existing call sites built against the 1.x `Color.Token.*` API will need updating.
 
-```
+The exporter generates **one Swift file per token type** (`ColorTokens.swift`, `ShadowTokens.swift`, `TypographyTokens.swift`, …) into a configurable directory (`./Styles` by default). Value tokens (colors, gradients) extend their natural SwiftUI type; measure-like tokens (spacing, radii, font sizes, …) live in an `enum` namespace; typography is exposed as reusable `Text` modifiers.
+
+```swift
 import SwiftUI
 
-extension Color {
-    
-    static let Token = Color.TokenColor()
-    
-    struct TokenColor {
+public extension Color {
+    /// Primary brand color
+    static let brandButtonPrimary = Color(.sRGB, red: 0.27, green: 0.54, blue: 1, opacity: 1)
+    static let brandButtonPrimaryAlias = Color.brandButtonPrimary
+}
+```
 
-        let primary = Color(.sRGB, red: 69/255, green: 137/255, blue: 255/255, opacity: 1) 
-        let success = Color(.sRGB, red: 0/255, green: 164/255, blue: 84/255, opacity: 1) 
-        let critical = Color(.sRGB, red: 210/255, green: 48/255, blue: 49/255, opacity: 1) 
-        ...
+```swift
+import SwiftUI
+
+public enum Space {
+    static let spacing8: CGFloat = 8
+}
+
+public extension Text {
+    func heading() -> some View {
+        self
+            .font(Font.custom("Poppins", size: 24))
+            .fontWeight(.bold)
+            .tracking(0.5)
+            .lineSpacing(28)
+            .textCase(.uppercase)
     }
 }
 ```
 
-For borders, shadows, radii and text styles, the exporter will generate extensions that expose the tokens in a way they can be directly applied to UI elements.
-
-```
-import SwiftUI
-
-extension Text {
-
-    func textStyleUi11Regular() -> some View {
-    return this
-        .font(Font.custom("PoppinsRegular", size: 11))
-        .underline() 
-        .textCase(.uppercase) 
-    }
-}
-```
+Token references are preserved where a token is a full alias of another (e.g. `brandButtonPrimaryAlias` above), so the generated code mirrors the structure of your design system. Names, casing, prefixes, numeric precision and theme behaviour are all configurable — see `config.json` for every available option.
 
 
 ## Example Usage
 
-Once you have run the exporter against your design system, you can start using the code in your codebase right away. Here are a few examples of how you can use the output of the [SwiftUI] exporter:
+Once you have run the exporter against your design system, you can start using the code in your codebase right away:
 
-
-### Using a color and a text style
-
-```
+```swift
 struct ContentView: View {
     var body: some View {
         Text("Styled text")
-            .foregroundColor(Color.Token.primary)
-            .textStyleUi11Regular()
+            .foregroundColor(.brandButtonPrimary)
+            .heading()
+            .padding(Space.spacing8)
     }
 }
 ```
+
+
+## Development
+
+This exporter is a TypeScript project compiled with webpack to a single `dist/build.js` (the file Supernova executes).
+
+```bash
+npm install     # install dependencies
+npm run build   # compile src/ -> dist/build.js
+npm run dev     # rebuild on change while developing
+npm test        # run the Jest unit tests
+```
+
+The main logic lives in `src/`:
+
+- `src/index.ts` — entry point; fetches tokens, applies brand/theme filtering, orchestrates file generation
+- `src/helpers/swiftui.ts` — `SwiftUIHelper`, which renders each token type into SwiftUI value expressions
+- `src/content/token.ts` — symbol naming, references, and declaration rendering
+- `src/files/style-file.ts` — assembles one Swift file per token type
+- `src/constants/defaults.ts` — per-type file name, container and render strategy
+- `config.ts` / `config.json` — the user-configurable options and their defaults
 
 
 ## Installing
