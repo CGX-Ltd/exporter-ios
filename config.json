@@ -158,7 +158,7 @@
     {
         "key": "exportOnlyThemedTokens",
         "type": "boolean",
-        "default": false,
+        "default": true,
         "title": "Export only themed tokens",
         "description": "Theme files only include tokens whose value differs from the base value.",
         "category": "Themes"
@@ -213,5 +213,29 @@
         "title": "Indentation",
         "description": "Number of spaces used to indent generated declarations.",
         "category": "Other"
+    },
+    {
+        "key": "darkThemeName",
+        "type": "string",
+        "default": "dark",
+        "title": "Dark theme name",
+        "description": "Name of the theme whose values become the dark appearance of generated colorsets. Matched case-insensitively against each theme's code name or name.",
+        "category": "Colors"
+    },
+    {
+        "key": "colorAssetCatalogName",
+        "type": "string",
+        "default": "Colors.xcassets",
+        "title": "Color asset catalog name",
+        "description": "Name of the generated Xcode asset catalog that holds all color colorsets.",
+        "category": "Colors"
+    },
+    {
+        "key": "semanticGroupName",
+        "type": "string",
+        "default": "semantic",
+        "title": "Semantic color group name",
+        "description": "Only color tokens whose top-level group name matches this value (case-insensitively) are exported as colorsets. Primitive colors outside this group are dropped.",
+        "category": "Colors"
     }
 ]

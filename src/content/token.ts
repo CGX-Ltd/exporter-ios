@@ -5,6 +5,7 @@ import { TokenNameStructure } from "../../config"
 import { SWIFT_TARGETS } from "../constants/defaults"
 import { SwiftUIHelper, SwiftUIOptions } from "../helpers/swiftui"
 import { indent } from "../helpers/utils"
+import { colorsetName, isSemanticColorToken } from "./color-naming"
 
 /** The per-type prefix applied to a token name, based on configuration. */
 function getTokenPrefix(tokenType: TokenType): string {
@@ -31,11 +32,19 @@ export function tokenVariableName(token: Token, tokenGroups: Array<TokenGroup>):
 
 /**
  * Fully-qualified Swift accessor for a token, used when one token references
- * another (e.g. `Color.primary`, `Spacing.small`).
+ * another (e.g. `Color("primary")` for a semantic color asset, `Spacing.small`).
+ * Returns `null` for a non-semantic color (no colorset exists) so the caller can
+ * inline its value instead.
  */
-export function qualifiedReference(token: Token, tokenGroups: Array<TokenGroup>): string {
-  const target = SWIFT_TARGETS[token.tokenType]
+export function qualifiedReference(token: Token, tokenGroups: Array<TokenGroup>): string | null {
+  if (token.tokenType === TokenType.color) {
+    if (!isSemanticColorToken(token, tokenGroups)) {
+      return null
+    }
+    return `Color("${colorsetName(token, tokenGroups)}")`
+  }
   const name = tokenVariableName(token, tokenGroups)
+  const target = SWIFT_TARGETS[token.tokenType]
   const container = target.container.kind === "extension" ? target.container.type : target.container.name
   return `${container}.${name}`
 }

@@ -55,4 +55,16 @@ export type ExporterConfiguration = {
   exportBaseValues: boolean
   /** When enabled, theme files only include tokens whose value differs from the base value */
   exportOnlyThemedTokens: boolean
+  /**
+   * Name of the theme whose values become the dark appearance of generated colorsets.
+   * Matched case-insensitively against each theme's code name / name.
+   */
+  darkThemeName: string
+  /** Name of the generated Xcode asset catalog that holds all color colorsets */
+  colorAssetCatalogName: string
+  /**
+   * Only color tokens whose top-level group name matches this value (case-insensitively)
+   * are exported as colorsets. Primitive colors outside this group are dropped.
+   */
+  semanticGroupName: string
 }

@@ -16,25 +16,49 @@ The SwiftUI Exporter allows you to **produce production-ready code for all produ
 
 You can generate all production ready-code either manually using Supernova's [VS Code extension](https://marketplace.visualstudio.com/items?itemName=SupernovaIO.pulsar-vsc-extension), or automate your code delivery pipeline using Supernova [Design Continuous Delivery](https://supernova.io/automated-code-delivery).
 
-> **Note for users of 1.x:** This exporter was rewritten on Supernova's new TypeScript export engine in 2.0. The generated SwiftUI API changed (configurable naming, one file per token type, brand **and** theme support). See _Generated output_ below; existing call sites built against the 1.x `Color.Token.*` API will need updating.
+> **Note for users of 1.x:** This exporter was rewritten on Supernova's new TypeScript export engine in 2.0. The generated output changed: colors are now an Xcode asset catalog, other types are one Swift file per token type, with configurable naming and brand **and** theme support. Existing call sites built against the 1.x `Color.Token.*` API will need updating.
 
-The exporter generates **one Swift file per token type** (`ColorTokens.swift`, `ShadowTokens.swift`, `TypographyTokens.swift`, …) into a configurable directory (`./Styles` by default). Value tokens (colors, gradients) extend their natural SwiftUI type; measure-like tokens (spacing, radii, font sizes, …) live in an `enum` namespace; typography is exposed as reusable `Text` modifiers.
+### Colors → Xcode asset catalog
+
+Color tokens are exported as an **Xcode asset catalog** (`Colors.xcassets` by default, under `./Styles`) with **one `.colorset` per semantic color**. Each colorset carries two appearances:
+
+- **Any appearance** ← the token's base value
+- **Dark appearance** ← the value of the token under the **"dark" theme** (configurable via `darkThemeName`)
+
+Only color tokens that live under the configured top-level "semantic" group (default name `semantic`, case-insensitive, configurable via `semanticGroupName`) become colorsets. Primitive colors (e.g. under a `Primitives` group) are dropped — they're only ever consumed via references, which the colorset's resolved component values already bake in. The colorset name **excludes** the leading "Semantic" segment and any per-type prefix, so `Semantic / Surface / Background` produces `surfaceBackground.colorset`.
+
+Colors that the dark theme does not override get only the any appearance. Color export always bakes in light + dark and is independent of which themes are selected for the pipeline run. Use them by name:
 
 ```swift
-import SwiftUI
+Color("surfaceBackground")   // resolves light/dark automatically from the asset catalog
+```
 
-public extension Color {
-    /// Primary brand color
-    static let brandButtonPrimary = Color(.sRGB, red: 0.27, green: 0.54, blue: 1, opacity: 1)
-    static let brandButtonPrimaryAlias = Color.brandButtonPrimary
+`surfaceBackground.colorset/Contents.json` (white in light, black in dark):
+
+```json
+{
+  "colors": [
+    { "idiom": "universal",
+      "color": { "color-space": "srgb",
+        "components": { "alpha": "0xFF", "blue": "0xFF", "green": "0xFF", "red": "0xFF" } } },
+    { "idiom": "universal",
+      "appearances": [ { "appearance": "luminosity", "value": "dark" } ],
+      "color": { "color-space": "srgb",
+        "components": { "alpha": "0xFF", "blue": "0x00", "green": "0x00", "red": "0x00" } } }
+  ],
+  "info": { "author": "xcode", "version": 1 }
 }
 ```
+
+### Other token types → SwiftUI code
+
+All other token types generate **one Swift file per type** (`ShadowTokens.swift`, `TypographyTokens.swift`, …) into the same directory. Value tokens (gradients) extend their natural SwiftUI type; measure-like tokens (spacing, radii, font sizes, …) live in an `enum` namespace; typography is exposed as reusable `Text` modifiers.
 
 ```swift
 import SwiftUI
 
 public enum Space {
-    static let spacing8: CGFloat = 8
+    public static let spacing8: CGFloat = 8
 }
 
 public extension Text {
@@ -49,7 +73,7 @@ public extension Text {
 }
 ```
 
-Token references are preserved where a token is a full alias of another (e.g. `brandButtonPrimaryAlias` above), so the generated code mirrors the structure of your design system. Names, casing, prefixes, numeric precision and theme behaviour are all configurable — see `config.json` for every available option.
+Token references are preserved where a token is a full alias of another (color references resolve to `Color("name")` asset lookups), so the generated code mirrors the structure of your design system. Names, casing, prefixes, numeric precision, the dark theme name and theme behaviour are all configurable — see `config.json` for every available option.
 
 
 ## Example Usage
@@ -60,7 +84,7 @@ Once you have run the exporter against your design system, you can start using t
 struct ContentView: View {
     var body: some View {
         Text("Styled text")
-            .foregroundColor(.brandButtonPrimary)
+            .foregroundColor(Color("accent"))
             .heading()
             .padding(Space.spacing8)
     }
@@ -84,7 +108,9 @@ The main logic lives in `src/`:
 - `src/index.ts` — entry point; fetches tokens, applies brand/theme filtering, orchestrates file generation
 - `src/helpers/swiftui.ts` — `SwiftUIHelper`, which renders each token type into SwiftUI value expressions
 - `src/content/token.ts` — symbol naming, references, and declaration rendering
-- `src/files/style-file.ts` — assembles one Swift file per token type
+- `src/files/style-file.ts` — assembles one Swift file per non-color token type
+- `src/files/colorset-file.ts` — assembles the `Colors.xcassets` colorsets (light + dark)
+- `src/content/color-naming.ts` — semantic-token filter and colorset name generation
 - `src/constants/defaults.ts` — per-type file name, container and render strategy
 - `config.ts` / `config.json` — the user-configurable options and their defaults
 

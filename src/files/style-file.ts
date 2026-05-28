@@ -24,7 +24,10 @@ export function generateStyleFiles(
     return []
   }
 
-  const types = [...new Set(tokens.map((token) => token.tokenType))]
+  // Color tokens are emitted as an Xcode asset catalog (see colorset-file.ts), not Swift.
+  const types = [...new Set(tokens.map((token) => token.tokenType))].filter(
+    (type) => type !== TokenType.color
+  )
   return types
     .map((type) => styleOutputFile(type, tokens, tokenGroups, themePath, theme))
     .filter((file): file is OutputTextFile => file !== null)
@@ -38,6 +41,11 @@ export function styleOutputFile(
   themePath: string = "",
   theme?: TokenTheme
 ): OutputTextFile | null {
+  // Color tokens are emitted as an asset catalog, never as a Swift file.
+  if (type === TokenType.color) {
+    return null
+  }
+
   const target = SWIFT_TARGETS[type]
   if (!target) {
     return null
