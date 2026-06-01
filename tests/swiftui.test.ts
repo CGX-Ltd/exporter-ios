@@ -108,12 +108,12 @@ describe("SwiftUIHelper value rendering", () => {
     it("builds the full SwiftUI Text modifier chain", () => {
       const modifiers = SwiftUIHelper.typographyModifiers(typography() as never, options)
       expect(modifiers).toEqual([
+        ".underline()",
         '.font(Font.custom("Poppins", size: 16))',
         ".fontWeight(.bold)",
         ".tracking(0.5)",
         ".lineSpacing(20)",
         ".textCase(.uppercase)",
-        ".underline()",
       ])
     })
 
