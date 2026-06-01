@@ -143,6 +143,18 @@ export class SwiftUIHelper {
     const modifiers: string[] = []
     const family = swiftString(typography.fontFamily.text)
     const size = num(typography.fontSize.measure, options.decimals)
+
+    // Decoration is applied first so it resolves against `Text` (where it exists on
+    // iOS 15); later modifiers turn the chain into `some View`, where iOS 16+ is required.
+    switch (typography.textDecoration.value) {
+      case "Underline":
+        modifiers.push(`.underline()`)
+        break
+      case "Strikethrough":
+        modifiers.push(`.strikethrough()`)
+        break
+    }
+
     modifiers.push(`.font(Font.custom("${family}", size: ${size}))`)
 
     const weight = this.fontWeight(typography.fontWeight.text)
@@ -164,15 +176,6 @@ export class SwiftUIHelper {
         break
       case "Lower":
         modifiers.push(`.textCase(.lowercase)`)
-        break
-    }
-
-    switch (typography.textDecoration.value) {
-      case "Underline":
-        modifiers.push(`.underline()`)
-        break
-      case "Strikethrough":
-        modifiers.push(`.strikethrough()`)
         break
     }
 
